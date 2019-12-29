@@ -8,6 +8,7 @@
 
 int main(){
     cv::Mat im = cv::imread("PATH to obj1000.jpg ");
+	cv::imshow("Display Window", im);
 
 	//Fill Code here
 
