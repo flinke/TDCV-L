@@ -18,6 +18,18 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="HOGDescriptor.cpp" />
+    <ClCompile Include="hog_visualization.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="RandomForest.cpp" />
+    <ClCompile Include="task1.cpp" />
+    <ClCompile Include="task2.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="HOGDescriptor.h" />
+    <ClInclude Include="RandomForest.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{5C39C442-FFAE-4D57-A8AA-7CE1E7B30613}</ProjectGuid>
@@ -123,18 +135,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="hog_visualization.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="task1\HOGDescriptor.cpp" />
-    <ClCompile Include="task1\task1.cpp" />
-    <ClCompile Include="task2\RandomForest.cpp" />
-    <ClCompile Include="task2\task2.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="task1\HOGDescriptor.h" />
-    <ClInclude Include="task2\RandomForest.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

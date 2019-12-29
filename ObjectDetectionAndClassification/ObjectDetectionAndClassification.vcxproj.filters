@@ -15,30 +15,30 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="hog_visualization.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="task1\HOGDescriptor.cpp">
+    <ClCompile Include="HOGDescriptor.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="task1\task1.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="task2\RandomForest.cpp">
+    <ClCompile Include="RandomForest.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="task2\task2.cpp">
+    <ClCompile Include="task1.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="task2.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="task1\HOGDescriptor.h">
+    <ClInclude Include="HOGDescriptor.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="task2\RandomForest.h">
+    <ClInclude Include="RandomForest.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
