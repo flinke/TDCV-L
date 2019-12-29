@@ -44,7 +44,7 @@ public:
     }
 
     void setPadSize(cv::Size sz) {
-        pad_size = sz;
+        cv::Size pad_size = sz;
     }
 
 

@@ -56,5 +56,6 @@ void RandomForest::train(/* Fill */)
 float RandomForest::predict(/* Fill */)
 {
     // Fill
+	return 0; //MORITZ ADDED
 }
 

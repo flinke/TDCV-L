@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="HOGDescriptor.cpp" />
     <ClCompile Include="hog_visualization.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="RandomForest.cpp" />
     <ClCompile Include="task1.cpp" />
     <ClCompile Include="task2.cpp" />

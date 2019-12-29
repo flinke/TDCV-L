@@ -31,7 +31,10 @@ void HOGDescriptor::detectHOGDescriptor(cv::Mat &im, std::vector<float> &feat, c
 }
 
 //returns instance of cv::HOGDescriptor
-cv::HOGDescriptor & HOGDescriptor::getHog_detector() {
-    // Fill code here
-}
+
+
+//cv::HOGDescriptor & HOGDescriptor::getHog_detector() {
+//    // Fill code here
+//	return 0; 
+//}
 
