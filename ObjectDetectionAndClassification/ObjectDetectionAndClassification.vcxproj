@@ -27,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HOGDescriptor.h" />
+    <ClInclude Include="hog_visualization.h" />
     <ClInclude Include="RandomForest.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

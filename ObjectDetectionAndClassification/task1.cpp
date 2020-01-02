@@ -2,21 +2,126 @@
 #include <opencv2/opencv.hpp>
 
 #include "HOGDescriptor.h"
+#include "hog_visualization.h"
 
 
+using namespace cv;
+using namespace std;
+
+list<vector<float>> imageToDescriptionList(string filepath);
+vector <float> getHOGDescriptorVector(cv::HOGDescriptor hog, Mat imageGrayscaleResizedWithPadding);
+Mat _cropImageToSquare(Mat uncroppedImage);
+Mat downscaleAndCropImage(Mat originalImage, Size hogWinSize);
+Mat rotateImage(Mat originalImage, int rotCodeInt);
+Mat flipImage(Mat originalImage);
+void display(Mat image);
 
 
-int main(){
-    cv::Mat im = cv::imread("data/task1/obj1000.jpg");
-	cv::imshow("Display Window", im);
-	cv::waitKey(0);
-
-	//Fill Code here
-
-    /*
-    	* Create instance of HOGDescriptor and initialize
-    	* Compute HOG descriptors
-    	* visualize
-    */
-    return 0;
+int main() { // C:/Users/games/Desktop/HW2/TDCV-L/ObjectDetectionAndClassification/
+	list<vector<float>> List = imageToDescriptionList("data/task1/obj1000.jpg");
+	//list<vector<float>> List = imageToDescriptionList("data/task2/test/01/0075.jpg");
+	return 0;
 }
+
+// Function that returns list of DescriptorVectors given an Image
+list<vector<float>> imageToDescriptionList(string filepath){
+
+	// Read image and convert to grayscale
+	Mat input = imread(filepath, IMREAD_GRAYSCALE);
+	Mat imageGrayscale = input;
+	// display(input);
+	// cvtColor(input, imageGrayscale, COLOR_RGB2GRAY); Not needed anymore
+
+	// Set parameters for HOG-Extraction ~~~~~~~~~~~~~~~~~~~
+
+		// Params for HOGDescriptor
+		int border = 1;
+		Size winSize = Size(64, 64);
+		Size blockSize = Size(16, 16);
+		Size blockStride = Size(8, 8); //Zu Überlappung von Blöcken: (Überlappung Prozent = 1 - Size/Stride; bei 32/32 => Keine Überlappung, bei 16/32 = 50% ÜL
+		Size cellSize = Size(8, 8);
+		Size padding = Size(border, border);
+		int nbins = 9;
+
+		// Init HOG
+		cv::HOGDescriptor hog = cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins);
+
+		// Params for image operations
+		bool useFlip = true;
+
+		// Init List of DescriptorVectors that will be returned in the end
+		list<vector<float>> imageDescriptorList;
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	// Reminder: OriginalGrayscaleImage => Mat imageGrayscale;
+
+	imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), downscaleAndCropImage(imageGrayscale, hog.winSize)));
+	if (useFlip == true) {
+		imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), downscaleAndCropImage(flipImage(imageGrayscale), hog.winSize)));
+	}
+
+	for (int rotCode = 0; rotCode <= 2; rotCode++){ // Iterate over RotCodes (see: cv::RotateFlags)
+		Mat tempImage = downscaleAndCropImage(rotateImage(imageGrayscale, rotCode), hog.winSize);
+		imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), tempImage));
+		if (useFlip == true) {
+			imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), flipImage(tempImage)));
+		}
+	}
+
+	return imageDescriptorList;
+}
+
+// Function returns HOGDescriptorVector if a single given image
+vector <float> getHOGDescriptorVector(cv::HOGDescriptor hog, Mat imageGrayscaleResized) {
+
+	vector<float> descriptorVector;
+	hog.compute(imageGrayscaleResized, descriptorVector, hog.winSize, Size(0, 0));
+	visualizeHOG(imageGrayscaleResized, descriptorVector, cv::HOGDescriptor(hog.winSize, hog.blockSize, hog.blockStride, hog.cellSize, hog.nbins), 5);
+	return descriptorVector;
+}
+
+//  Function returns squared-crop of the uncropped image
+Mat _cropImageToSquare(Mat uncroppedImage) {
+
+	int minCR = std::min(uncroppedImage.cols, uncroppedImage.rows);
+	Rect rCrop = Rect((uncroppedImage.cols - minCR) / 2,
+		(uncroppedImage.rows - minCR) / 2,
+		minCR,
+		minCR);
+	Mat croppedImage = uncroppedImage(rCrop);
+	return croppedImage;
+}
+
+// Function returns downscaled and cropped version of the original image
+Mat downscaleAndCropImage(Mat originalImage, Size hogWinSize) {
+	int minCR = std::min(originalImage.cols, originalImage.rows);
+	Mat downsizedAndCroppedImage;
+	float rescaleFactor = (float)hogWinSize.width / (float)minCR;
+	cv::resize(_cropImageToSquare(originalImage), downsizedAndCroppedImage, cv::Size(), rescaleFactor, rescaleFactor);
+	return downsizedAndCroppedImage;
+}
+
+// Function to rotate image by given 90*x degrees
+Mat rotateImage(Mat originalImage, int rotCodeInt) {
+	Mat rotatedImage;
+	cv::rotate(originalImage, rotatedImage, rotCodeInt);
+	return rotatedImage;
+}
+
+// Function to flip image
+Mat flipImage(Mat originalImage) {
+	Mat flippedImage;
+	flip(originalImage, flippedImage, 1);
+	return flippedImage;
+}
+// Function to display image (shortcut for imshow)
+void display(Mat image) {
+	cv::imshow("Display Window", image);
+	cv::waitKey(0);
+	return;
+}
+
+
+// TODO?: Paddings??? Aber wofür?
+//Mat imageGrayscaleResizedWithPadding;
+//copyMakeBorder(imageGrayscaleResized, imageGrayscaleResizedWithPadding, border, border, border, border, BORDER_REPLICATE);
