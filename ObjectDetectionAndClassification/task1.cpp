@@ -79,7 +79,7 @@ vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscale
 
 	vector<float> descriptorVector;
 	hog.compute(imageGrayscaleResized, descriptorVector, hog.winSize, Size(0, 0));
-	visualizeHOG(imageGrayscaleResized, descriptorVector, cv::HOGDescriptor(hog.winSize, hog.blockSize, hog.blockStride, hog.cellSize, hog.nbins), 5);
+	visualizeHOG(imageGrayscaleResized, descriptorVector, hog, 5);
 	return descriptorVector;
 }
 
