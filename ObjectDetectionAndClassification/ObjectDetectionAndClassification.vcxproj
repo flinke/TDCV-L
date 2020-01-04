@@ -29,6 +29,7 @@
     <ClInclude Include="HOGDescriptor.h" />
     <ClInclude Include="hog_visualization.h" />
     <ClInclude Include="RandomForest.h" />
+    <ClInclude Include="task1.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

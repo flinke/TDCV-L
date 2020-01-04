@@ -8,11 +8,11 @@
 using namespace cv;
 using namespace std;
 
-// variables
-list<vector<float>> imageToDescriptionList(string filepath); // takes an image, applies several operations on it and saves the single HOG descriptors in this list
+// function that returns all descriptors as a list after performing different rotations and extracting the descriptors
+list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog = false); 
 
-// functions
-vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResizedWithPadding);
+// function that returns single description vector
+vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResizedWithPadding, bool visualizeHog = false);
 Mat _cropImageToSquare(Mat uncroppedImage);
 Mat downscaleAndCropImage(Mat originalImage, Size hogWinSize);
 Mat rotateImage(Mat originalImage, int rotCodeInt);
@@ -20,14 +20,14 @@ Mat flipImage(Mat originalImage);
 void display(Mat image);
 
 
-int main() { // C:/Users/games/Desktop/HW2/TDCV-L/ObjectDetectionAndClassification/
-	list<vector<float>> List = imageToDescriptionList("data/task1/obj1000.jpg");
-	//list<vector<float>> List = imageToDescriptionList("data/task2/test/01/0075.jpg");
-	return 0;
-}
+//int main() {
+//	list<vector<float>> List = imageToDescriptionList("data/task1/obj1000.jpg");
+//	//list<vector<float>> List = imageToDescriptionList("data/task2/test/01/0075.jpg");
+//	return 0;
+//}
 
 // Function that returns list of DescriptorVectors given an Image
-list<vector<float>> imageToDescriptionList(string filepath){
+list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog) {
 
 	// Read image and convert to grayscale
 	Mat input = imread(filepath, IMREAD_GRAYSCALE);
@@ -58,16 +58,16 @@ list<vector<float>> imageToDescriptionList(string filepath){
 
 	// Reminder: OriginalGrayscaleImage => Mat imageGrayscale;
 
-	imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(imageGrayscale, hog.winSize)));
+	imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(imageGrayscale, hog.winSize), visualizeHog));
 	if (useFlip == true) {
-		imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(flipImage(imageGrayscale), hog.winSize)));
+		imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(flipImage(imageGrayscale), hog.winSize), visualizeHog));
 	}
 
-	for (int rotCode = 0; rotCode <= 2; rotCode++){ // Iterate over RotCodes (see: cv::RotateFlags)
+	for (int rotCode = 0; rotCode <= 2; rotCode++) { // Iterate over RotCodes (see: cv::RotateFlags)
 		Mat tempImage = downscaleAndCropImage(rotateImage(imageGrayscale, rotCode), hog.winSize);
-		imageDescriptorList.push_back(getHOGDescriptorVector(hog, tempImage));
+		imageDescriptorList.push_back(getHOGDescriptorVector(hog, tempImage, visualizeHog));
 		if (useFlip == true) {
-			imageDescriptorList.push_back(getHOGDescriptorVector(hog, flipImage(tempImage)));
+			imageDescriptorList.push_back(getHOGDescriptorVector(hog, flipImage(tempImage), visualizeHog));
 		}
 	}
 
@@ -75,11 +75,13 @@ list<vector<float>> imageToDescriptionList(string filepath){
 }
 
 // Function returns HOGDescriptorVector if a single given image
-vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResized) {
+vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResized, bool visualizeHog) {
 
 	vector<float> descriptorVector;
 	hog.compute(imageGrayscaleResized, descriptorVector, hog.winSize, Size(0, 0));
-	visualizeHOG(imageGrayscaleResized, descriptorVector, hog, 5);
+	if (visualizeHog == true) {
+		visualizeHOG(imageGrayscaleResized, descriptorVector, hog, 5);
+	}
 	return descriptorVector;
 }
 
