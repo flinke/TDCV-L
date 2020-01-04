@@ -8,8 +8,11 @@
 using namespace cv;
 using namespace std;
 
-list<vector<float>> imageToDescriptionList(string filepath);
-vector <float> getHOGDescriptorVector(cv::HOGDescriptor hog, Mat imageGrayscaleResizedWithPadding);
+// variables
+list<vector<float>> imageToDescriptionList(string filepath); // takes an image, applies several operations on it and saves the single HOG descriptors in this list
+
+// functions
+vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResizedWithPadding);
 Mat _cropImageToSquare(Mat uncroppedImage);
 Mat downscaleAndCropImage(Mat originalImage, Size hogWinSize);
 Mat rotateImage(Mat originalImage, int rotCodeInt);
@@ -32,39 +35,39 @@ list<vector<float>> imageToDescriptionList(string filepath){
 	// display(input);
 	// cvtColor(input, imageGrayscale, COLOR_RGB2GRAY); Not needed anymore
 
-	// Set parameters for HOG-Extraction ~~~~~~~~~~~~~~~~~~~
+	// Set parameters for HOG-Extraction ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-		// Params for HOGDescriptor
-		int border = 1;
-		Size winSize = Size(64, 64);
-		Size blockSize = Size(16, 16);
-		Size blockStride = Size(8, 8); //Zu Überlappung von Blöcken: (Überlappung Prozent = 1 - Size/Stride; bei 32/32 => Keine Überlappung, bei 16/32 = 50% ÜL
-		Size cellSize = Size(8, 8);
-		Size padding = Size(border, border);
-		int nbins = 9;
+	// Params for HOGDescriptor
+	int border = 1;
+	Size winSize = Size(64, 64);
+	Size blockSize = Size(16, 16);
+	Size blockStride = Size(8, 8); //Zu Überlappung von Blöcken: (Überlappung Prozent = 1 - Size/Stride; bei 32/32 => Keine Überlappung, bei 16/32 = 50% ÜL
+	Size cellSize = Size(8, 8);
+	Size padding = Size(border, border);
+	int nbins = 9;
 
-		// Init HOG
-		cv::HOGDescriptor hog = cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins);
+	// Init HOG
+	cv::HOGDescriptor hog = cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins);
 
-		// Params for image operations
-		bool useFlip = true;
+	// Params for image operations
+	bool useFlip = true;
 
-		// Init List of DescriptorVectors that will be returned in the end
-		list<vector<float>> imageDescriptorList;
-	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Init List of DescriptorVectors that will be returned in the end
+	list<vector<float>> imageDescriptorList;
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	// Reminder: OriginalGrayscaleImage => Mat imageGrayscale;
 
-	imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), downscaleAndCropImage(imageGrayscale, hog.winSize)));
+	imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(imageGrayscale, hog.winSize)));
 	if (useFlip == true) {
-		imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), downscaleAndCropImage(flipImage(imageGrayscale), hog.winSize)));
+		imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(flipImage(imageGrayscale), hog.winSize)));
 	}
 
 	for (int rotCode = 0; rotCode <= 2; rotCode++){ // Iterate over RotCodes (see: cv::RotateFlags)
 		Mat tempImage = downscaleAndCropImage(rotateImage(imageGrayscale, rotCode), hog.winSize);
-		imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), tempImage));
+		imageDescriptorList.push_back(getHOGDescriptorVector(hog, tempImage));
 		if (useFlip == true) {
-			imageDescriptorList.push_back(getHOGDescriptorVector(cv::HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins), flipImage(tempImage)));
+			imageDescriptorList.push_back(getHOGDescriptorVector(hog, flipImage(tempImage)));
 		}
 	}
 
@@ -72,7 +75,7 @@ list<vector<float>> imageToDescriptionList(string filepath){
 }
 
 // Function returns HOGDescriptorVector if a single given image
-vector <float> getHOGDescriptorVector(cv::HOGDescriptor hog, Mat imageGrayscaleResized) {
+vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResized) {
 
 	vector<float> descriptorVector;
 	hog.compute(imageGrayscaleResized, descriptorVector, hog.winSize, Size(0, 0));
