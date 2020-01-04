@@ -9,7 +9,7 @@ using namespace cv;
 using namespace std;
 
 // function that returns all descriptors as a list after performing different rotations and extracting the descriptors
-list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog = false); 
+list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog = false, bool getRotatedSamples = true); 
 
 // function that returns single description vector
 vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResizedWithPadding, bool visualizeHog = false);
@@ -27,7 +27,7 @@ void display(Mat image);
 //}
 
 // Function that returns list of DescriptorVectors given an Image
-list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog) {
+list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog, bool getRotatedSamples) {
 
 	// Read image and convert to grayscale
 	Mat input = imread(filepath, IMREAD_GRAYSCALE);
@@ -57,8 +57,12 @@ list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog) {
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	// Reminder: OriginalGrayscaleImage => Mat imageGrayscale;
+	
 
 	imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(imageGrayscale, hog.winSize), visualizeHog));
+	if (getRotatedSamples == false) {
+		return imageDescriptorList; 
+	}
 	if (useFlip == true) {
 		imageDescriptorList.push_back(getHOGDescriptorVector(hog, downscaleAndCropImage(flipImage(imageGrayscale), hog.winSize), visualizeHog));
 	}

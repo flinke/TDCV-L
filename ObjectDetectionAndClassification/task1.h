@@ -11,7 +11,7 @@
 using namespace cv;
 using namespace std;
 
-list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog = false);
+list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog = false, bool getRotatedSamples = true);
 
 // Maybe not needed
 vector <float> getHOGDescriptorVector(cv::HOGDescriptor& hog, Mat imageGrayscaleResizedWithPadding, bool visualizeHog = false);

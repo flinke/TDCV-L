@@ -1,14 +1,22 @@
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <filesystem>
+
 
 
 #include "HOGDescriptor.h"
 #include "RandomForest.h"
 #include "task1.h"
 
+
 using namespace std;
 using namespace cv;
+namespace fs = std::experimental::filesystem;
+
+vector<string> list_dir(string path);
+vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples = true);
+vector<vector<string>> getAllClassPaths(string filepath);
 
 template<class ClassifierType>
 void performanceEval(cv::Ptr<ClassifierType> classifier, cv::Ptr<cv::ml::TrainData> data) {
@@ -60,8 +68,50 @@ void testForest(){
 
 
 int main(){
-	list<vector<float>> List = imageToDescriptionList("data/task1/obj1000.jpg");
+
+	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
+	vector<list<vector<float>>> allTrainingDescriptors = getAllDescriptors("data/task2/train/");
+	vector<list<vector<float>>> allTestingDescriptors = getAllDescriptors("data/task2/test/", false);
+	
     //testDTrees();
     //testForest();
     return 0;
+}
+
+
+//function that gets all descriptors for all (output = [class[0], class[1], ...] with class[0] = [hogforimg1, hogforimg2, ...]
+vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples) {
+	// Get all img_paths for all training classes
+	vector<vector<string>> imgOfEachClass = getAllClassPaths(filepath);
+
+	vector<list<vector<float>>> descriptorsForAllClasses;
+	for (vector<string> filenameArrayOfSingleClass : imgOfEachClass) {
+		list<vector<float>> temp;
+		for (string filename : filenameArrayOfSingleClass) {
+			list<vector<float>> descriptors = imageToDescriptionList(filename, false, getRotatedSamples);
+			for (vector<float> singleDescriptor : descriptors) {
+				temp.push_back(singleDescriptor);
+			}
+		}
+		descriptorsForAllClasses.push_back(temp);
+	}
+	return descriptorsForAllClasses;
+} 
+
+//function that returns all filenames (output = [class[0], class[1], ...] with class[0] = ["~/00/img1", "~/00/img2", ...]
+vector<vector<string>> getAllClassPaths(string filepath) {
+	vector<vector<string>> output;
+	vector<string> directories = list_dir(filepath);
+	for (std::string element : directories) {
+		output.push_back(list_dir(element));
+	}
+	return output;
+}
+
+//function to return all elements in folder (eg. input = "data/task2/train/" -> output = ["data/task2/train/00", "~/01", ...]
+vector<string> list_dir(string path) {
+	vector <string> img_list;
+	for (const auto& entry : fs::directory_iterator(path))
+		img_list.push_back(entry.path().string());
+	return img_list;
 }
