@@ -1,5 +1,8 @@
 #include "RandomForest.h"
 
+using namespace std;
+using namespace cv;
+
 RandomForest::RandomForest()
 {
 }
@@ -7,20 +10,28 @@ RandomForest::RandomForest()
 RandomForest::RandomForest(int treeCount, int maxDepth, int CVFolds, int minSampleCount, int maxCategories)
     :mTreeCount(treeCount), mMaxDepth(maxDepth), mCVFolds(CVFolds), mMinSampleCount(minSampleCount), mMaxCategories(maxCategories)
 {
-   /*
-     construct a forest with given number of trees and initialize all the trees with the
-     given parameters
-   */
+	mTrees = RandomForest::create();
 }
 
 RandomForest::~RandomForest()
 {
 }
 
+vector<Ptr<cv::ml::DTrees>> RandomForest::create() {
+	vector<Ptr<cv::ml::DTrees>> tempTrees;
+	for (int i = 0; i < mTreeCount; i++) {
+		Ptr<cv::ml::DTrees> tempTree = cv::ml::DTrees::create();		
+		tempTree->setCVFolds(mCVFolds);
+		tempTree->setMaxCategories(mMaxCategories);
+		tempTree->setMaxDepth(mMaxDepth);
+		tempTree->setMinSampleCount(mMinSampleCount);
+		tempTrees.push_back(tempTree);
+	}
+}
+
 void RandomForest::setTreeCount(int treeCount)
 {
-    // Fill
-
+	mTreeCount = treeCount;
 }
 
 void RandomForest::setMaxDepth(int maxDepth)
@@ -30,20 +41,25 @@ void RandomForest::setMaxDepth(int maxDepth)
         mTrees[treeIdx]->setMaxDepth(mMaxDepth);
 }
 
-void RandomForest::setCVFolds(int cvFols)
+void RandomForest::setCVFolds(int cvFolds)
 {
-    // Fill
-
+	mCVFolds = cvFolds;
+	for (uint treeIdx = 0; treeIdx < mTreeCount; treeIdx++)
+		mTrees[treeIdx]->setMaxDepth(mCVFolds);
 }
 
 void RandomForest::setMinSampleCount(int minSampleCount)
 {
-    // Fill
+	mMinSampleCount = minSampleCount;
+	for (uint treeIdx = 0; treeIdx < mTreeCount; treeIdx++)
+		mTrees[treeIdx]->setMaxDepth(mMinSampleCount);
 }
 
 void RandomForest::setMaxCategories(int maxCategories)
 {
-    // Fill
+	mMaxCategories = maxCategories;
+	for (uint treeIdx = 0; treeIdx < mTreeCount; treeIdx++)
+		mTrees[treeIdx]->setMaxDepth(mMaxCategories);
 }
 
 
@@ -56,6 +72,6 @@ void RandomForest::train(/* Fill */)
 float RandomForest::predict(/* Fill */)
 {
     // Fill
-	return 0; //MORITZ ADDED
+	return 0;
 }
 

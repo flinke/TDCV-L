@@ -17,26 +17,31 @@ namespace fs = std::experimental::filesystem;
 vector<string> list_dir(string path);
 vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples = true);
 vector<vector<string>> getAllClassPaths(string filepath);
+RandomForest forest;
+
 
 template<class ClassifierType>
-void performanceEval(cv::Ptr<ClassifierType> classifier, cv::Ptr<cv::ml::TrainData> data) {
+void performanceEval(cv::Ptr<ClassifierType> classifier, cv::Ptr<cv::ml::TrainData> test_data) {
 
-	/* 
-
-		Fill Code 	
-
+	/*
+		TODO
 	*/
 
-};
+
+}
 
 
-
-
-
-void testDTrees() {
+void testDTrees(cv::Ptr<cv::ml::TrainData>  train_data, cv::Ptr<cv::ml::TrainData> test_data) {
 
     int num_classes = 6;
+	Ptr<cv::ml::DTrees> tree = cv::ml::DTrees::create();
+	tree->setCVFolds(10);
+	tree->setMaxCategories(10);
+	tree->setMaxDepth(10);
+	tree->setMinSampleCount(10);
 
+	cv::Ptr<cv::ml::TrainData> sample; //TODO
+	tree->train(sample);
     /* 
       * Create your data (i.e Use HOG from task 1 to compute the descriptor for your images)
       * Train a single Decision Tree and evaluate the performance 
@@ -50,8 +55,8 @@ void testDTrees() {
 }
 
 
-void testForest(){
-
+void testForest(vector<list<vector<float>>>& training_data, vector<list<vector<float>>>& test_data){
+	
     int num_classes = 6;
 
     /* 
@@ -69,10 +74,12 @@ void testForest(){
 
 int main(){
 
+	forest = RandomForest(100, 10, 10, 50, 10); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
+
 	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
+	//TODO Convert into training data
 	vector<list<vector<float>>> allTrainingDescriptors = getAllDescriptors("data/task2/train/");
 	vector<list<vector<float>>> allTestingDescriptors = getAllDescriptors("data/task2/test/", false);
-
     //testDTrees();
     //testForest();
     return 0;
