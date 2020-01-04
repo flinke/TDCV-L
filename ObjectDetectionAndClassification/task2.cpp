@@ -72,7 +72,7 @@ int main(){
 	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
 	vector<list<vector<float>>> allTrainingDescriptors = getAllDescriptors("data/task2/train/");
 	vector<list<vector<float>>> allTestingDescriptors = getAllDescriptors("data/task2/test/", false);
-	
+
     //testDTrees();
     //testForest();
     return 0;

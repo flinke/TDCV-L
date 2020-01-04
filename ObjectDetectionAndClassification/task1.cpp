@@ -40,9 +40,9 @@ list<vector<float>> imageToDescriptionList(string filepath, bool visualizeHog, b
 	// Params for HOGDescriptor
 	int border = 1;
 	Size winSize = Size(64, 64);
-	Size blockSize = Size(16, 16);
-	Size blockStride = Size(8, 8); //Zu Überlappung von Blöcken: (Überlappung Prozent = 1 - Size/Stride; bei 32/32 => Keine Überlappung, bei 16/32 = 50% ÜL
-	Size cellSize = Size(8, 8);
+	Size blockSize = Size(32, 32);
+	Size blockStride = Size(16, 16); //Zu Überlappung von Blöcken: (Überlappung Prozent = 1 - Size/Stride; bei 32/32 => Keine Überlappung, bei 16/32 = 50% ÜL
+	Size cellSize = Size(16, 16);
 	Size padding = Size(border, border);
 	int nbins = 9;
 
