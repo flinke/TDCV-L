@@ -27,6 +27,7 @@ vector<Ptr<cv::ml::DTrees>> RandomForest::create() {
 		tempTree->setMinSampleCount(mMinSampleCount);
 		tempTrees.push_back(tempTree);
 	}
+	return tempTrees;
 }
 
 void RandomForest::setTreeCount(int treeCount)

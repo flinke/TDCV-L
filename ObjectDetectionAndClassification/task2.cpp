@@ -12,10 +12,11 @@
 
 using namespace std;
 using namespace cv;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 vector<string> list_dir(string path);
 vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples = true);
+vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors);
 vector<vector<string>> getAllClassPaths(string filepath);
 RandomForest forest;
 
@@ -31,17 +32,20 @@ void performanceEval(cv::Ptr<ClassifierType> classifier, cv::Ptr<cv::ml::TrainDa
 }
 
 
-void testDTrees(cv::Ptr<cv::ml::TrainData>  train_data, cv::Ptr<cv::ml::TrainData> test_data) {
+void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 
     int num_classes = 6;
 	Ptr<cv::ml::DTrees> tree = cv::ml::DTrees::create();
-	tree->setCVFolds(10);
+	tree->setCVFolds(1);
 	tree->setMaxCategories(10);
 	tree->setMaxDepth(10);
 	tree->setMinSampleCount(10);
 
-	cv::Ptr<cv::ml::TrainData> sample; //TODO
-	tree->train(sample);
+	Rect r = Rect(0, 0, train_data[0].cols - 1, train_data[0].rows);
+	Rect response = Rect(train_data[0].cols - 1, 0, 1, train_data[0].rows);
+	cout << "M = " << endl << " " << train_data[0](r) << endl << endl;
+	//cout << "M = " << endl << " " << train_data[0](response) << endl << endl;
+	tree->train(train_data[0](r), cv::ml::ROW_SAMPLE, train_data[0](response));
     /* 
       * Create your data (i.e Use HOG from task 1 to compute the descriptor for your images)
       * Train a single Decision Tree and evaluate the performance 
@@ -55,7 +59,7 @@ void testDTrees(cv::Ptr<cv::ml::TrainData>  train_data, cv::Ptr<cv::ml::TrainDat
 }
 
 
-void testForest(vector<list<vector<float>>>& training_data, vector<list<vector<float>>>& test_data){
+void testForest(vector<Mat> training_data, vector<Mat> test_data){
 	
     int num_classes = 6;
 
@@ -74,13 +78,15 @@ void testForest(vector<list<vector<float>>>& training_data, vector<list<vector<f
 
 int main(){
 
-	forest = RandomForest(100, 10, 10, 50, 10); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
+	forest = RandomForest(100, 10, 1, 50, 10); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
 
 	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
 	//TODO Convert into training data
-	vector<list<vector<float>>> allTrainingDescriptors = getAllDescriptors("data/task2/train/");
-	vector<list<vector<float>>> allTestingDescriptors = getAllDescriptors("data/task2/test/", false);
-    //testDTrees();
+	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task2/train/");
+	vector<list<vector<float>>> testTemp = getAllDescriptors("data/task2/test/", false);
+	vector<Mat> allTrainingDescriptors = convertToMatVector(trainTemp);
+	vector<Mat> allTestingDescriptors = convertToMatVector(testTemp);
+	testDTrees(allTrainingDescriptors, allTestingDescriptors);
     //testForest();
     return 0;
 }
@@ -104,6 +110,30 @@ vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSa
 	}
 	return descriptorsForAllClasses;
 } 
+
+vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors) {
+
+	vector<Mat> descriptorsAsMatVector;
+
+	float classNumber = 0;
+	for (list<vector<float>> singleClass : allDescriptors) {
+		int rows = singleClass.size();
+		int cols = singleClass.front().capacity();
+		Mat tempMat = Mat(rows, cols + 1, CV_32FC1);
+		int j = 0;
+		for (vector<float> singleDescriptor : singleClass) {
+			for (int i = 0; i < cols; i++) {
+				tempMat.at<float>(j, i) = singleDescriptor[i];
+			}
+			tempMat.at<float>(j, cols) = classNumber;
+			j++;
+		}		
+		//cout << "M = " << endl << " " << tempMat << endl << endl;
+		descriptorsAsMatVector.push_back(tempMat);
+		classNumber++;
+	}
+	return descriptorsAsMatVector;
+}
 
 //function that returns all filenames (output = [class[0], class[1], ...] with class[0] = ["~/00/img1", "~/00/img2", ...]
 vector<vector<string>> getAllClassPaths(string filepath) {
