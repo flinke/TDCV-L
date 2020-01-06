@@ -3,6 +3,7 @@
 
 #include "HOGDescriptor.h"
 #include "hog_visualization.h"
+#include "task1.h"
 
 
 using namespace cv;
