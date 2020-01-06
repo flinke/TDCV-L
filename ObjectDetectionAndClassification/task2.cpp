@@ -41,6 +41,7 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	tree->setMaxDepth(INT8_MAX);
 	tree->setMinSampleCount(2); //Standard 10; Weniger = besser (zumindest hier?)
 
+	// Fügt alle Mats aus dem vector<Mat> zusammen (unschön geschrieben)
 	Mat temp;
 	vconcat(train_data[0], train_data[1], temp);
 	vconcat(temp, train_data[2], temp);
