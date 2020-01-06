@@ -34,24 +34,64 @@ void performanceEval(cv::Ptr<ClassifierType> classifier, cv::Ptr<cv::ml::TrainDa
 
 void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 
-    int num_classes = 6;
+    //int num_classes = 6;
 	Ptr<cv::ml::DTrees> tree = cv::ml::DTrees::create();
-	tree->setCVFolds(1);
-	tree->setMaxCategories(10);
-	tree->setMaxDepth(10);
-	tree->setMinSampleCount(10);
+	tree->setCVFolds(1); //Geht nicht mit anderen Zahlen größer als 1 (warum?)
+	tree->setMaxCategories(10); //Standard 10;
+	tree->setMaxDepth(INT8_MAX);
+	tree->setMinSampleCount(2); //Standard 10; Weniger = besser (zumindest hier?)
 
-	Rect r = Rect(0, 0, train_data[0].cols - 1, train_data[0].rows);
-	Rect response = Rect(train_data[0].cols - 1, 0, 1, train_data[0].rows);
-	cout << "M = " << endl << " " << train_data[0](r) << endl << endl;
-	//cout << "M = " << endl << " " << train_data[0](response) << endl << endl;
-	tree->train(train_data[0](r), cv::ml::ROW_SAMPLE, train_data[0](response));
-    /* 
-      * Create your data (i.e Use HOG from task 1 to compute the descriptor for your images)
-      * Train a single Decision Tree and evaluate the performance 
-      * Experiment with the MaxDepth parameter, to see how it affects the performance
+	Mat temp;
+	vconcat(train_data[0], train_data[1], temp);
+	vconcat(temp, train_data[2], temp);
+	vconcat(temp, train_data[3], temp);
+	vconcat(temp, train_data[4], temp);
+	vconcat(temp, train_data[5], temp);
+	Mat train = temp;
+	vconcat(test_data[0], test_data[1], temp);
+	vconcat(temp, test_data[2], temp);
+	vconcat(temp, test_data[3], temp);
+	vconcat(temp, test_data[4], temp);
+	vconcat(temp, test_data[5], temp);
+	Mat test = temp;
 
-    */
+	// Maks
+	Rect rCropForTrain = Rect(0, 0, train.cols - 1, train.rows); //Mask to get only the data
+	Rect rvCropForTrain = Rect(train.cols - 1, 0, 1, train.rows); //Mask to get only the classLables
+
+	// Extract responseVector and convert to CV_32S (else will not be recognized as a lable)
+	Mat trainResponseVector;
+	train(rvCropForTrain).convertTo(trainResponseVector, CV_32S);
+
+	// Train with data + reponseVector
+	tree->train(train(rCropForTrain), cv::ml::ROW_SAMPLE, trainResponseVector);
+
+	// Masks
+	Rect rCropForTest = Rect(0, 0, train.cols - 1, test.rows);
+	Rect rvCropForTest = Rect(test.cols - 1, 0, 1, test.rows); 
+
+	// Convert to CV_32S (previously class defined as float)
+	Mat testResponseVector;
+	test(rvCropForTest).convertTo(testResponseVector, CV_32S);
+
+	Mat predictOutput;
+	tree->predict(test(rCropForTest), predictOutput, cv::ml::DTrees::PREDICT_MAX_VOTE);
+	cout << "predictOutput = " << endl << " " << predictOutput.t() << endl << endl; //Output transposed
+	cout << "groundTruth = " << endl << " " << testResponseVector.t() << endl << endl; //Output transposed
+
+	// Calc Misses vs Ground truth
+	int hits = 0;
+	int misses = 0;
+	for (int i = 0; i < testResponseVector.rows; i++) {
+		if (predictOutput.at<int>(i, 0) == testResponseVector.at<int>(i,0)) {
+			hits++;
+		}
+		else {
+			misses++;
+		}
+	}
+	cout << "Hits: " << hits << "; Misses: " << misses << endl << endl;
+	cout << "Using: Predict_max_vote" << endl << endl;
 
     //performanceEval<cv::ml::DTrees>(tree, train_data);
     //performanceEval<cv::ml::DTrees>(tree, test_data);
