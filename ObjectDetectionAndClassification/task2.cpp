@@ -17,7 +17,7 @@ namespace fs = std::filesystem;
 
 
 template<class ClassifierType>
-void performanceEval(cv::Ptr<ClassifierType> treeOrForest, Mat data) {
+void performanceEval(ClassifierType& treeOrForest, Mat data) {
 
 	// Masks 
 	Rect rCrop = Rect(0, 0, data.cols - 1, data.rows);
@@ -28,7 +28,7 @@ void performanceEval(cv::Ptr<ClassifierType> treeOrForest, Mat data) {
 	data(rvCrop).convertTo(testResponseVector, CV_32S);
 
 	Mat predictOutput;
-	treeOrForest->predict(data(rCrop), predictOutput, cv::ml::DTrees::PREDICT_MAX_VOTE);
+	treeOrForest.predict(data(rCrop), predictOutput, cv::ml::DTrees::PREDICT_MAX_VOTE);
 
 	// Output to console
 	//cout << "predictOutput = " << endl << " " << predictOutput.t() << endl << endl; //Output transposed
@@ -76,8 +76,8 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	cout << "training our tree ..." << endl;
 	tree->train(train(rCropForTrain), cv::ml::ROW_SAMPLE, trainResponseVector);
 
-	performanceEval<cv::ml::DTrees>(tree, train);
-	performanceEval<cv::ml::DTrees>(tree, test);
+	performanceEval<cv::ml::DTrees>(*tree, train);
+	performanceEval<cv::ml::DTrees>(*tree, test);
 }
 
 
@@ -93,7 +93,7 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 	int maxCategories = 11;
 
 	forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
-	Ptr<RandomForest> forestPtr = &forest;
+	//Ptr<RandomForest> forestPtr = &forest;
 	// Fügt alle Mats aus dem vector<Mat> zusammen (unschön geschrieben)
 	Mat train;
 	Mat test;
@@ -108,10 +108,10 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 	train(rvCropForTrain).convertTo(trainResponseVector, CV_32S);
 
 	Mat predictOutput;
-	forestPtr->train(train);
+	forest.train(train);
 
 	//performanceEval<RandomForest>(forestPtr, train);
-	performanceEval<RandomForest>(forestPtr, test);
+	performanceEval<RandomForest>(forest, test);
 }
 
 
