@@ -8,19 +8,12 @@
 #include "HOGDescriptor.h"
 #include "RandomForest.h"
 #include "task1.h"
+#include "task2.h"
 
 
 using namespace std;
 using namespace cv;
 namespace fs = std::filesystem;
-
-vector<string> list_dir(string path);
-Mat getRandomSample(Mat& entireData, int sampleSize);
-void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vector<Mat>& test_data);
-vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples = true);
-vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors);
-vector<vector<string>> getAllClassPaths(string filepath);
-RandomForest forest;
 
 
 template<class ClassifierType>
@@ -52,7 +45,7 @@ void performanceEval(cv::Ptr<ClassifierType> treeOrForest, Mat data) {
 			misses++;
 		}
 	}
-	cout << "Hits: " << hits << "; Misses: " << misses << "; Accuracy: " << (float)hits / (misses + hits) << endl << endl;
+	cout << "Hits: " << hits << "; Misses: " << misses << "; Accuracy: " << (float)hits / (misses + hits) << endl;
 
 }
 
@@ -71,7 +64,7 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	Mat test;
 	mergeVectorToSingleMats(train, test, train_data, test_data); //quick and dirty
 
-	// Maks
+	// Masks
 	Rect rCropForTrain = Rect(0, 0, train.cols - 1, train.rows); //Mask to get only the data
 	Rect rvCropForTrain = Rect(train.cols - 1, 0, 1, train.rows); //Mask to get only the classLables
 
@@ -80,6 +73,7 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	train(rvCropForTrain).convertTo(trainResponseVector, CV_32S);
 
 	// Train with data + reponseVector
+	cout << "training our tree ..." << endl;
 	tree->train(train(rCropForTrain), cv::ml::ROW_SAMPLE, trainResponseVector);
 
 	performanceEval<cv::ml::DTrees>(tree, train);
@@ -89,8 +83,10 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 
 void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 
+	cout << "training our forest ..." << endl;
+
 	//int num_classes = 6;
-	int treeCount = 100;
+	int treeCount = 200;
 	int maxDepth = 10;
 	int cvFolds = 1;
 	int minSampleCount = 1;
@@ -123,6 +119,7 @@ int main() {
 
 	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
 	//TODO Convert into training data
+	cout << "computing descriptors ..." << endl;
 	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task2/train/");
 	vector<list<vector<float>>> testTemp = getAllDescriptors("data/task2/test/", false);
 	vector<Mat> allTrainingDescriptors = convertToMatVector(trainTemp);
@@ -132,6 +129,9 @@ int main() {
 	//mergeVectorToSingleMats(train, test, allTrainingDescriptors, allTestingDescriptors);
 	//testDTrees(allTrainingDescriptors, allTestingDescriptors);
 	testForest(allTrainingDescriptors, allTestingDescriptors);
+
+	cout << "DONE" << endl;
+
 	return 0;
 }
 
@@ -140,20 +140,17 @@ Mat getRandomSample(Mat& entireData, int sampleSize) {
 }
 
 void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vector<Mat>& test_data) {
-	// SEHR SEHR SEHR UNSCHÖN UND FUNKTIONIERT NUR WENN KLASSENZAHL BLEIBT; BITTE FIXEN
-	Mat temp;
-	vconcat(train_data[0], train_data[1], temp);
-	vconcat(temp, train_data[2], temp);
-	vconcat(temp, train_data[3], temp);
-	vconcat(temp, train_data[4], temp);
-	vconcat(temp, train_data[5], temp);
-	train = temp;
-	vconcat(test_data[0], test_data[1], temp);
-	vconcat(temp, test_data[2], temp);
-	vconcat(temp, test_data[3], temp);
-	vconcat(temp, test_data[4], temp);
-	vconcat(temp, test_data[5], temp);
-	test = temp;
+
+	int num_classes = train_data.size(); // Is this equal to the size of train_data / test_data? else set it back to 6
+
+	// Fügt alle Mats aus dem vector<Mat> zusammen (sehr schön geschrieben) -> Deskriptoren werden zeilenweise aneinandergereiht
+	train = train_data[0];
+	test = test_data[0];
+	for (int i = 1; i < num_classes; i++)
+	{
+		vconcat(train, train_data[i], train);
+		vconcat(test, test_data[i], test);
+	}
 }
 
 
@@ -181,8 +178,9 @@ vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors) {
 
 	vector<Mat> descriptorsAsMatVector;
 
-	float classNumber = 0;
-	for (list<vector<float>> singleClass : allDescriptors) {
+	for (float classNumber = 0; classNumber < allDescriptors.size(); classNumber++)
+	{
+		list<vector<float>> singleClass = allDescriptors[classNumber];
 		int rows = singleClass.size();
 		int cols = singleClass.front().capacity();
 		Mat tempMat = Mat(rows, cols + 1, CV_32FC1);
@@ -196,7 +194,6 @@ vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors) {
 		}
 		//cout << "M = " << endl << " " << tempMat << endl << endl;
 		descriptorsAsMatVector.push_back(tempMat);
-		classNumber++;
 	}
 	return descriptorsAsMatVector;
 }

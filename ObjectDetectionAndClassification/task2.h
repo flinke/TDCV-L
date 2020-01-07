@@ -15,4 +15,5 @@ vector<string> list_dir(string path);
 vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples = true);
 vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors);
 vector<vector<string>> getAllClassPaths(string filepath);
+void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vector<Mat>& test_data);
 RandomForest forest;
