@@ -32,37 +32,10 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
     int num_classes = train_data.size(); // Is this equal to the size of train_data / test_data? else set it back to 6
 
 	Ptr<cv::ml::DTrees> tree = cv::ml::DTrees::create();
-	tree->setCVFolds(1); //Geht nicht mit anderen Zahlen größer als 1 (warum?)
+	tree->setCVFolds(1); //Geht nicht mit anderen Zahlen grÃ¶ÃŸer als 1 (warum?)
 	tree->setMaxCategories(10); //Standard 10;
 	tree->setMaxDepth(INT8_MAX);
 	tree->setMinSampleCount(2); //Standard 10; Weniger = besser (zumindest hier?)
-
-	// Fügt alle Mats aus dem vector<Mat> zusammen (sehr schön geschrieben) -> Deskriptoren werden zeilenweise aneinandergereiht
-	Mat train = train_data[0];
-	Mat test = test_data[0];
-	for (int i = 1; i < num_classes; i++)
-	{
-		vconcat(train, train_data[i], train);
-		vconcat(test, test_data[i], test);
-	}
-
-
-	// ############################################## DELETE IF NOT NEEDED ##########################
-	// Fügt alle Mats aus dem vector<Mat> zusammen (unschön geschrieben)
-	//Mat temp;
-	//vconcat(train_data[0], train_data[1], temp);
-	//vconcat(temp, train_data[2], temp);
-	//vconcat(temp, train_data[3], temp);
-	//vconcat(temp, train_data[4], temp);
-	//vconcat(temp, train_data[5], temp);
-	//Mat train = temp;
-	//vconcat(test_data[0], test_data[1], temp);
-	//vconcat(temp, test_data[2], temp);
-	//vconcat(temp, test_data[3], temp);
-	//vconcat(temp, test_data[4], temp);
-	//vconcat(temp, test_data[5], temp);
-	//Mat test = temp;
-	// ##############################################################################################
 
 	// Mask
 	Rect rCropForTrain = Rect(0, 0, train.cols - 1, train.rows); //Mask to get only the data
@@ -117,7 +90,7 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data){
       * 
       * Create your data (i.e Use HOG from task 1 to compute the descriptor for your images)
       * Train a Forest and evaluate the performance 
-      * Experiment with the MaxDepth & TreeCount parameters, to see how it affects the performance
+      * Experiment with the MaxDepth & Count parameters, to see how it affects the performance
 
     */
 
