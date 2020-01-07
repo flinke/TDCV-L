@@ -52,14 +52,14 @@ void performanceEval(cv::Ptr<ClassifierType> treeOrForest, Mat data) {
 			misses++;
 		}
 	}
-	cout << "Hits: " << hits << "; Misses: " << misses << "; Accuracy: " << (float) hits/(misses+hits) << endl << endl;
+	cout << "Hits: " << hits << "; Misses: " << misses << "; Accuracy: " << (float)hits / (misses + hits) << endl << endl;
 
 }
 
 
 void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 
-    //int num_classes = 6;
+	//int num_classes = 6;
 	Ptr<cv::ml::DTrees> tree = cv::ml::DTrees::create();
 	tree->setCVFolds(1); //Geht nicht mit anderen Zahlen größer als 1 (warum?)
 	tree->setMaxCategories(10); //Standard 10;
@@ -82,15 +82,15 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	// Train with data + reponseVector
 	tree->train(train(rCropForTrain), cv::ml::ROW_SAMPLE, trainResponseVector);
 
-    performanceEval<cv::ml::DTrees>(tree, train);
-    performanceEval<cv::ml::DTrees>(tree, test);
+	performanceEval<cv::ml::DTrees>(tree, train);
+	performanceEval<cv::ml::DTrees>(tree, test);
 }
 
 
-void testForest(vector<Mat> training_data, vector<Mat> test_data){
-	
-    //int num_classes = 6;
-	int treeCount = 200;
+void testForest(vector<Mat> training_data, vector<Mat> test_data) {
+
+	//int num_classes = 6;
+	int treeCount = 100;
 	int maxDepth = 10;
 	int cvFolds = 1;
 	int minSampleCount = 1;
@@ -115,11 +115,11 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data){
 	forestPtr->train(train);
 
 	//performanceEval<RandomForest>(forestPtr, train);
-    performanceEval<RandomForest>(forestPtr, test);
+	performanceEval<RandomForest>(forestPtr, test);
 }
 
 
-int main(){
+int main() {
 
 	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
 	//TODO Convert into training data
@@ -131,15 +131,15 @@ int main(){
 	Mat test;
 	//mergeVectorToSingleMats(train, test, allTrainingDescriptors, allTestingDescriptors);
 	//testDTrees(allTrainingDescriptors, allTestingDescriptors);
-    testForest(allTrainingDescriptors, allTestingDescriptors);
-    return 0;
+	testForest(allTrainingDescriptors, allTestingDescriptors);
+	return 0;
 }
 
 Mat getRandomSample(Mat& entireData, int sampleSize) {
 	return entireData;
 }
 
-void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vector<Mat>& test_data) { 
+void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vector<Mat>& test_data) {
 	// SEHR SEHR SEHR UNSCHÖN UND FUNKTIONIERT NUR WENN KLASSENZAHL BLEIBT; BITTE FIXEN
 	Mat temp;
 	vconcat(train_data[0], train_data[1], temp);
@@ -175,7 +175,7 @@ vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSa
 		descriptorsForAllClasses.push_back(temp);
 	}
 	return descriptorsForAllClasses;
-} 
+}
 
 vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors) {
 
@@ -193,7 +193,7 @@ vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors) {
 			}
 			tempMat.at<float>(j, cols) = classNumber;
 			j++;
-		}		
+		}
 		//cout << "M = " << endl << " " << tempMat << endl << endl;
 		descriptorsAsMatVector.push_back(tempMat);
 		classNumber++;
