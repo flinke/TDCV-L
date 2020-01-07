@@ -24,10 +24,12 @@ public:
     void setCVFolds(int cvFols);
     void setMinSampleCount(int minSampleCount);
     void setMaxCategories(int maxCategories);
-    bool train(cv::Mat entireTrainingSet);
+    bool train(cv::Mat entireTrainingSet, int numsamp);
     float predict(cv::Mat testData, cv::Mat& predictOutput, int flag);
     cv::Mat calcResponseVector(std::vector<cv::Mat> vec);
     cv::Mat getSample(cv::Mat entireData, int sampleSize);
+    bool train(std::vector<cv::Mat> entireTrainingSet, int numsamp);
+    cv::Mat getSample(std::vector<cv::Mat> entireData, int sampleSize);
 
 
 private:

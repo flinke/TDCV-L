@@ -71,6 +71,8 @@ void RandomForest::setMaxCategories(int maxCategories)
 		mTrees[treeIdx]->setMaxDepth(mMaxCategories);
 }
 
+
+
 Mat RandomForest::getSample(Mat entireData, int sampleSize) {
 	Mat sample = Mat(sampleSize, entireData.cols, CV_32FC1);
 	int randomIndex;
@@ -87,11 +89,59 @@ Mat RandomForest::getSample(Mat entireData, int sampleSize) {
 	return sample;
 }
 
-bool RandomForest::train(Mat entireTrainingSet) {
-	Mat sample;
-	for (Ptr<cv::ml::DTrees> tree : mTrees) {
-		sample = getSample(entireTrainingSet, 200);
 
+Mat RandomForest::getSample(vector<Mat> entireData, int sampleSize) {
+	int numberOfClasses = entireData.size();
+	int samplesPerClass = sampleSize / numberOfClasses;
+	Mat sample = Mat(sampleSize, entireData.at(0).cols, CV_32FC1);
+	int randomIndex;
+	int rd;
+	for (int k = 0; k < numberOfClasses; k++) {
+		int dataSize = entireData.at(k).rows;
+		for (int i = 0; i < samplesPerClass; i++) {
+			rd = rand();
+			randomIndex = rd % dataSize;
+			for (int j = 0; j < entireData.at(0).cols; j++) {
+				sample.at<float>(i+k*samplesPerClass, j) = entireData.at(k).at<float>(randomIndex, j);
+			}
+		}
+	}
+	//cout << " " << sample << endl << endl;
+	return sample;
+}
+
+bool RandomForest::train(vector<Mat> entireTrainingSet, int numsamp) {
+	Mat sample;
+	int counterForConsole = 0;
+	cout << "	-> generating samples ... ";
+	for (Ptr<cv::ml::DTrees> tree : mTrees) {
+		sample = getSample(entireTrainingSet, numsamp);
+
+		if (counterForConsole % 20 == 0) cout << counterForConsole << " ... ";
+		counterForConsole++;
+		// Maks
+		Rect rCropForTrain = Rect(0, 0, sample.cols - 1, sample.rows); //Mask to get only the data
+		Rect rvCropForTrain = Rect(sample.cols - 1, 0, 1, sample.rows); //Mask to get only the classLables
+
+		// Extract responseVector and convert to CV_32S (else will not be recognized as a lable)
+		Mat trainResponseVector;
+		sample(rvCropForTrain).convertTo(trainResponseVector, CV_32S);
+
+		// Train with data + reponseVector
+		tree->train(sample(rCropForTrain), cv::ml::ROW_SAMPLE, trainResponseVector);
+	}
+	return true;
+}
+
+bool RandomForest::train(Mat entireTrainingSet, int numsamp) {
+	Mat sample;
+	int counterForConsole = 0;
+	cout << "	-> generating samples ... ";
+	for (Ptr<cv::ml::DTrees> tree : mTrees) {
+		sample = getSample(entireTrainingSet, numsamp);
+
+		if (counterForConsole % 20 == 0) cout << counterForConsole << " ... ";
+		counterForConsole++;
 		// Maks
 		Rect rCropForTrain = Rect(0, 0, sample.cols - 1, sample.rows); //Mask to get only the data
 		Rect rvCropForTrain = Rect(sample.cols - 1, 0, 1, sample.rows); //Mask to get only the classLables
@@ -107,14 +157,7 @@ bool RandomForest::train(Mat entireTrainingSet) {
 }
 
 float RandomForest::predict(Mat testData, Mat& predictOutput, int flag) {
-	/*
-		
-			-> test all trees with entireTestData
-			-> sum up per Row of Results
-			-> find maj-winner
-			-> save in output
-	
-	*/
+	cout << "predicting output ..." << endl;
 	// Masks 
 	Rect rCrop = Rect(0, 0, testData.cols - 1, testData.rows);
 	Rect rvCrop = Rect(testData.cols - 1, 0, 1, testData.rows);
@@ -129,6 +172,7 @@ float RandomForest::predict(Mat testData, Mat& predictOutput, int flag) {
 }
 
 Mat RandomForest::calcResponseVector(vector<Mat> vec) {
+	cout << "calculating responses ..." << endl;
 	Mat response = Mat(vec[0].rows,1, CV_32S);
 	for (int i = 0; i < vec[0].rows; i++) {
 		int classes[6] = { 0,0,0,0,0,0 };
@@ -155,6 +199,7 @@ Mat RandomForest::calcResponseVector(vector<Mat> vec) {
 					break;
 			}
 		}
+		cout << classes[0] << " " << classes[1] << " " << classes[2] << " " << classes[3] << " " << classes[4] << " " << classes[5] << " " << endl;
 		const int N = sizeof(classes) / sizeof(int);
 		int majorityClass = std::distance(classes, max_element(classes, classes + N)); //Get MajClass
 		response.at<int>(i, 0) = majorityClass;

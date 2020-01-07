@@ -86,15 +86,15 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 	cout << "training our forest ..." << endl;
 
 	//int num_classes = 6;
-	int treeCount = 200;
-	int maxDepth = 10;
+	int treeCount = 350;
+	int maxDepth = 15;
 	int cvFolds = 1;
 	int minSampleCount = 1;
-	int maxCategories = 11;
+	int maxCategories = 15;
 
 	forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
 	//Ptr<RandomForest> forestPtr = &forest;
-	// Fügt alle Mats aus dem vector<Mat> zusammen (unschön geschrieben)
+
 	Mat train;
 	Mat test;
 	mergeVectorToSingleMats(train, test, training_data, test_data); //quick and dirty
@@ -108,9 +108,10 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 	train(rvCropForTrain).convertTo(trainResponseVector, CV_32S);
 
 	Mat predictOutput;
-	forest.train(train);
+	//forest.train(train, 150);
+	forest.train(training_data, 100); // Bei 300 Samples + 350 Trees auch gute ergebnisse; Dauert aber ewig lol
 
-	//performanceEval<RandomForest>(forestPtr, train);
+	performanceEval<RandomForest>(forest, train);
 	performanceEval<RandomForest>(forest, test);
 }
 
