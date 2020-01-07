@@ -8,17 +8,12 @@
 #include "HOGDescriptor.h"
 #include "RandomForest.h"
 #include "task1.h"
+#include "task2.h"
 
 
 using namespace std;
 using namespace cv;
 namespace fs = std::filesystem;
-
-vector<string> list_dir(string path);
-vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSamples = true);
-vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors);
-vector<vector<string>> getAllClassPaths(string filepath);
-RandomForest forest;
 
 
 template<class ClassifierType>
@@ -56,7 +51,7 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	vconcat(temp, test_data[5], temp);
 	Mat test = temp;
 
-	// Maks
+	// Mask
 	Rect rCropForTrain = Rect(0, 0, train.cols - 1, train.rows); //Mask to get only the data
 	Rect rvCropForTrain = Rect(train.cols - 1, 0, 1, train.rows); //Mask to get only the classLables
 
@@ -65,6 +60,7 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	train(rvCropForTrain).convertTo(trainResponseVector, CV_32S);
 
 	// Train with data + reponseVector
+	cout << "training our tree ..." << endl;
 	tree->train(train(rCropForTrain), cv::ml::ROW_SAMPLE, trainResponseVector);
 
 	// Masks
@@ -123,6 +119,7 @@ int main(){
 
 	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
 	//TODO Convert into training data
+	cout << "computing descriptors ..." << endl;
 	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task2/train/");
 	vector<list<vector<float>>> testTemp = getAllDescriptors("data/task2/test/", false);
 	vector<Mat> allTrainingDescriptors = convertToMatVector(trainTemp);
