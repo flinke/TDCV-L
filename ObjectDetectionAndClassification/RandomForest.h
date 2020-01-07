@@ -17,18 +17,17 @@ public:
     
     ~RandomForest();
 
-	std::vector <cv::Ptr<cv::ml::DTrees>> create();
-
+	std::vector <cv::Ptr<cv::ml::DTrees>> createTrees();
+    static cv::Ptr<RandomForest> create(int treeCount, int maxDepth, int CVFolds, int minSampleCount, int maxCategories);
     void setTreeCount(int treeCount);
     void setMaxDepth(int maxDepth);
     void setCVFolds(int cvFols);
     void setMinSampleCount(int minSampleCount);
     void setMaxCategories(int maxCategories);
-	
-
-    void train(/* Fill */);
-
-    float predict(/* Fill */);
+    bool train(cv::Mat entireTrainingSet);
+    float predict(cv::Mat testData, cv::Mat& predictOutput, int flag);
+    cv::Mat calcResponseVector(std::vector<cv::Mat> vec);
+    cv::Mat getSample(cv::Mat entireData, int sampleSize);
 
 
 private:
