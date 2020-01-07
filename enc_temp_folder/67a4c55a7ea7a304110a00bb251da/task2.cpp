@@ -29,7 +29,7 @@ void performanceEval(cv::Ptr<ClassifierType> classifier, cv::Ptr<cv::ml::TrainDa
 
 void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 
-    int num_classes = train_data.size(); // Is this equal to the size of train_data / test_data? else set it back to 6
+    int num_classes = 6; // Is this equal to the size of train_data / test_data?
 
 	Ptr<cv::ml::DTrees> tree = cv::ml::DTrees::create();
 	tree->setCVFolds(1); //Geht nicht mit anderen Zahlen größer als 1 (warum?)
@@ -37,7 +37,7 @@ void testDTrees(vector<Mat>  train_data, vector<Mat> test_data) {
 	tree->setMaxDepth(INT8_MAX);
 	tree->setMinSampleCount(2); //Standard 10; Weniger = besser (zumindest hier?)
 
-	// Fügt alle Mats aus dem vector<Mat> zusammen (sehr schön geschrieben) -> Deskriptoren werden zeilenweise aneinandergereiht
+	// Fügt alle Mats aus dem vector<Mat> zusammen (sehr schön geschrieben)
 	Mat train = train_data[0];
 	Mat test = test_data[0];
 	for (int i = 1; i < num_classes; i++)
