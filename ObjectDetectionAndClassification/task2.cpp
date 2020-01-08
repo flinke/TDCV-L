@@ -116,25 +116,25 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 }
 
 
-int main() {
-
-	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
-	//TODO Convert into training data
-	cout << "computing descriptors ..." << endl;
-	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task2/train/");
-	vector<list<vector<float>>> testTemp = getAllDescriptors("data/task2/test/", false);
-	vector<Mat> allTrainingDescriptors = convertToMatVector(trainTemp);
-	vector<Mat> allTestingDescriptors = convertToMatVector(testTemp);
-	Mat train;
-	Mat test;
-	//mergeVectorToSingleMats(train, test, allTrainingDescriptors, allTestingDescriptors);
-	//testDTrees(allTrainingDescriptors, allTestingDescriptors);
-	testForest(allTrainingDescriptors, allTestingDescriptors);
-
-	cout << "DONE" << endl;
-
-	return 0;
-}
+//int main() {
+//
+//	//single descriptors can be accessed via vector[class(0-5)][image*8 or image] depending on if rotatedSamples = true/false
+//	//TODO Convert into training data
+//	cout << "computing descriptors ..." << endl;
+//	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task2/train/");
+//	vector<list<vector<float>>> testTemp = getAllDescriptors("data/task2/test/", false);
+//	vector<Mat> allTrainingDescriptors = convertToMatVector(trainTemp);
+//	vector<Mat> allTestingDescriptors = convertToMatVector(testTemp);
+//	Mat train;
+//	Mat test;
+//	//mergeVectorToSingleMats(train, test, allTrainingDescriptors, allTestingDescriptors);
+//	//testDTrees(allTrainingDescriptors, allTestingDescriptors);
+//	testForest(allTrainingDescriptors, allTestingDescriptors);
+//
+//	cout << "DONE" << endl;
+//
+//	return 0;
+//}
 
 Mat getRandomSample(Mat& entireData, int sampleSize) {
 	return entireData;
