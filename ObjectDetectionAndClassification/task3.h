@@ -16,4 +16,4 @@ using namespace std;
 using namespace cv;
 namespace fs = std::filesystem;
 
-void drawBox(Mat img, Rect window, int classID, float confidence);
+void drawBox(Mat& img, Rect& window, int classID, float confidence);
