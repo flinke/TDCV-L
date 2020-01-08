@@ -30,6 +30,9 @@
     <ClCompile Include="task2.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="task3.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HOGDescriptor.h">
@@ -45,6 +48,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="task2.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="task3.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
