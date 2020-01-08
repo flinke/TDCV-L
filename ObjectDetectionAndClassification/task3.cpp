@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 void drawBox(Mat img, Rect window, int classID, float confidence)
 {
 	// just if you want to customize the window frame color; else it's red
-	int r, g, b = 0;
+	int r = 0, g = 0, b = 0;
 	if (confidence >= 0.5)
 	{
 		r = 255;
