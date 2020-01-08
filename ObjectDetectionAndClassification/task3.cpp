@@ -29,7 +29,7 @@ int main() {
 	int cvFolds = 1;
 	int minSampleCount = 1;
 	int maxCategories = 15;
-	forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories);
+	RandomForest forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); // Can also be called with ::create (For tutors)
 
 	// Setup Training Data
 	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task3/train/");
@@ -40,7 +40,18 @@ int main() {
 	cout << "training our forest ..." << endl;
 	forest.train(allTrainingDescriptors, 100);
 
+	// Get Testfilenames
+	vector<string> filenames = list_dir("data/task3/test/");
 
+	/* Pseudo:::@@
+	
+	For each file in filenames:
+		Get Vector<Rect> & their confidence: -> slidingWindows
+		
+		For each Rect in Vecor:
+			-> drawBox	
+	
+	@@:::Pseudo */
 
 	cout << "DONE" << endl;
 	return 0;
