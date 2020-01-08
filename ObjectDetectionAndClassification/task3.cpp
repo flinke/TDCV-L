@@ -112,10 +112,56 @@ int SlidingWindow(int window_size, int stride)//, int num_windows = 1)
 
 }
 
+vector<int> StringToIntArray(string text)
+{
+	
+	//char str[] = text.c_str;
+	//
+	//// Returns first token  
+	//char* token = strtok(str, " ");
+	//
+	//// Keep printing tokens while one of the 
+	//// delimiters present in str[]. 
+	//while (token != NULL)
+	//{
+	//	printf("%s", token); 
+	//	token = strtok(NULL, " ");
+	//}
+
+	vector<string> resultString;
+	vector<int> resultInt;
+
+	string str = text;
+
+	char* cstr = new char[str.length() + 1];
+	std::strcpy(cstr, str.c_str());
+
+	// cstr now contains a c-string copy of str
+
+	char* p = std::strtok(cstr, " ");
+	while (p != 0)
+	{
+		resultString.push_back(p);
+		//std::cout << p << '\n';
+		p = std::strtok(NULL, " ");
+	}
+
+	delete[] cstr;
+
+
+	for (string s : resultString)
+	{
+
+		cout << s << endl;
+		resultInt.push_back(stoi(s));
+	}
+	return resultInt;
+}
+
 int main() {
 
     SlidingWindow(64, 64);
-
+	
 	// Setup Forest
 	int treeCount = 350;
 	int maxDepth = 15;
@@ -134,6 +180,9 @@ int main() {
 	forest.train(allTrainingDescriptors, 100);
 
 
+	// ########## START test StringToIntArray ###################################
+	StringToIntArray("0 12 345");
+	// ########## END test StringToIntArray ###################################
 
 	// ########## START test drawBox ###################################
 	//Mat img = imread("data/task1/obj1000.jpg");
