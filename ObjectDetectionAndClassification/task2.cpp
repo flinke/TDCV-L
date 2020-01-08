@@ -92,7 +92,7 @@ void testForest(vector<Mat> training_data, vector<Mat> test_data) {
 	int minSampleCount = 1;
 	int maxCategories = 15;
 
-	forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
+	RandomForest forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); //treecount, maxdepth (default: intmax), cvfolds (default: 10), minsamplecount (default: 10), maxcategories (default: 10)
 	//Ptr<RandomForest> forestPtr = &forest;
 
 	Mat train;

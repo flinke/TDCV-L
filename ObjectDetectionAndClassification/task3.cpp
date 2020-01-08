@@ -13,13 +13,11 @@ using namespace std;
 using namespace cv;
 namespace fs = std::filesystem;
 
-void drawBox(Mat& img, Rect& window, int classID, float confidence)
+void drawBox(Mat img, Rect window, int classID, float confidence)
 {
 	// just if you want to customize the window frame color; else it's red
-	int r = 0;
-	int g = 0;
-	int b = 0;
-	if (confidence >= 0.5 && classID < 6)
+	int r, g, b = 0;
+	if (confidence >= 0.5)
 	{
 		r = 255;
 		//Point topLeft(window.x, window.y);
@@ -36,7 +34,7 @@ int main() {
 	int cvFolds = 1;
 	int minSampleCount = 1;
 	int maxCategories = 15;
-	forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories);
+	RandomForest forest = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); // Can also be called with ::create (For tutors)
 
 	// Setup Training Data
 	vector<list<vector<float>>> trainTemp = getAllDescriptors("data/task3/train/");
@@ -47,14 +45,18 @@ int main() {
 	cout << "training our forest ..." << endl;
 	forest.train(allTrainingDescriptors, 100);
 
+	// Get Testfilenames
+	vector<string> filenames = list_dir("data/task3/test/");
 
-	// ########## START test drawBox ###################################
-	Mat img = imread("data/task1/obj1000.jpg");
-	Rect window = Rect(0, 0, img.cols, img.rows);
-	int classID = 1;
-	float confidence = 0.5f;
-	drawBox(img, window, classID, confidence);
-	// ########### END test drawBox #################################
+	/* Pseudo:::@@
+	
+	For each file in filenames:
+		Get Vector<Rect> & their confidence: -> slidingWindows
+		
+		For each Rect in Vecor:
+			-> drawBox	
+	
+	@@:::Pseudo */
 
 	cout << "DONE" << endl;
 	return 0;
