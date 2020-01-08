@@ -23,7 +23,7 @@ void drawBox(Mat& img, Rect& window, int classID, float confidence)
 	// for window frame color: beautiful coral
 	int r = 255, g = 100, b = 100;
 
-	if (confidence >= 0.5)
+	if (confidence >= 0.5 && classID < 3) // background class won't be drawn
 	{
 		Scalar color = Scalar(b, g, r);
 		Point topLeft(window.x, window.y + 10); // position of text
