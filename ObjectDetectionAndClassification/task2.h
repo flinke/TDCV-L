@@ -16,4 +16,5 @@ vector<list<vector<float>>> getAllDescriptors(string filepath, bool getRotatedSa
 vector<Mat> convertToMatVector(vector<list<vector<float>>>& allDescriptors);
 vector<vector<string>> getAllClassPaths(string filepath);
 void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vector<Mat>& test_data);
+void mergeVectorToSingleMats(Mat& data, vector<Mat>& train_data);
 //RandomForest forest;

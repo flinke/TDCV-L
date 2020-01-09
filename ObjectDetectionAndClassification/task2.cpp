@@ -154,6 +154,18 @@ void mergeVectorToSingleMats(Mat& train, Mat& test, vector<Mat>& train_data, vec
 	}
 }
 
+void mergeVectorToSingleMats(Mat& data,  vector<Mat>& train_data) {
+
+	int num_classes = train_data.size(); // Is this equal to the size of train_data / test_data? else set it back to 6
+
+	// Fügt alle Mats aus dem vector<Mat> zusammen (sehr schön geschrieben) -> Deskriptoren werden zeilenweise aneinandergereiht
+	data = train_data[0];
+
+	for (int i = 1; i < num_classes; i++)
+	{
+		vconcat(data, train_data[i], data);
+	}
+}
 
 
 //function that gets all descriptors for all (output = [class[0], class[1], ...] with class[0] = [hogforimg1, hogforimg2, ...]

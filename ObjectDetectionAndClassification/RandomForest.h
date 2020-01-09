@@ -26,7 +26,9 @@ public:
     void setMaxCategories(int maxCategories);
     bool train(cv::Mat entireTrainingSet, int numsamp);
     float predict(cv::Mat testData, cv::Mat& predictOutput, int flag);
+    float predict(cv::Mat testData, cv::Mat& predictOutput, int flag, std::vector<float>& predictedConfidence, std::vector<int>& predictedClass);
     cv::Mat calcResponseVector(std::vector<cv::Mat> vec);
+    cv::Mat calcResponseVector(std::vector<cv::Mat> vec, std::vector<float>& predictedConfidence, std::vector<int>& predictedClass);
     cv::Mat getSample(cv::Mat entireData, int sampleSize);
     bool train(std::vector<cv::Mat> entireTrainingSet, int numsamp);
     cv::Mat getSample(std::vector<cv::Mat> entireData, int sampleSize);
