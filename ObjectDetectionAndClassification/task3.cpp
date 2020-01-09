@@ -2,6 +2,7 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <Windows.h>
 
 #include "HOGDescriptor.h"
 #include "RandomForest.h"
@@ -26,6 +27,12 @@ namespace fs = std::filesystem;
 	GT_Test(Prognose, Klasse, file_loc);
 	// Test GT end
 */
+string ExePath() {
+	char buffer[MAX_PATH];
+	GetCurrentDirectoryA(256, buffer);
+	string::size_type pos = string(buffer).find_last_of("\\/");
+	return string(buffer).substr(0, pos);
+}
 
 vector<int> StringToIntArray(string text)
 {
@@ -67,7 +74,7 @@ vector<int> StringToIntArray(string text)
 	for (string s : resultString)
 	{
 
-		cout << s << endl;
+		//cout << s << endl;
 		resultInt.push_back(stoi(s));
 	}
 	return resultInt;
@@ -89,7 +96,7 @@ vector<float> GT_Test(vector<Rect> Prognose, vector<int> Klasse, string file_loc
 		string tp;
 		int i = 0;
 		while (getline(newfile, tp)) { //read data from file object and put it into string.
-			data[i] = tp; //print the data of the string
+			data.push_back(tp); //print the data of the string
 			i++;
 		}
 		//data has 3 rows, row 1 = class 0, row 2 = class 1, row 3 = class 2.
@@ -100,9 +107,8 @@ vector<float> GT_Test(vector<Rect> Prognose, vector<int> Klasse, string file_loc
 	for (int i = 0; i < data.size(); i++) {
 		string text = data[i];
 		vector classes_and_Recs = StringToIntArray(data[i]);
-		GT_Klasse[i] = classes_and_Recs[0];
-		GT_rect[i] = Rect(classes_and_Recs[1], classes_and_Recs[2], classes_and_Recs[3], classes_and_Recs[4]);
-
+		GT_Klasse.push_back(classes_and_Recs[0]);
+		GT_rect.push_back(Rect(classes_and_Recs[1], classes_and_Recs[2], classes_and_Recs[3], classes_and_Recs[4]));
 	}
 
 	//	Erinnerung :
@@ -116,8 +122,8 @@ vector<float> GT_Test(vector<Rect> Prognose, vector<int> Klasse, string file_loc
 	for (int i = 0; i < Prognose.size(); i++) {
 		for (int j = 0; j < GT_Klasse.size(); j++) {
 			if (Klasse[i] == GT_Klasse[j]) {
-				Rect Vereinigung = Prognose[i] & GT_rect[i];
-				float Quotient = (Vereinigung.height * Vereinigung.width) / ((Prognose[i]).height * (Prognose[i]).width);
+				Rect Vereinigung = Prognose[i] & GT_rect[j];
+				float Quotient = (float)(Vereinigung.height * Vereinigung.width) / ((Prognose[i]).height * (Prognose[i]).width);
 				if (Quotient >= Cutoff) {
 					falsch--;
 					richtig++;
@@ -126,8 +132,9 @@ vector<float> GT_Test(vector<Rect> Prognose, vector<int> Klasse, string file_loc
 		}
 	}
 
-	float Precision = richtig / (richtig + falsch);
-	float Recall = richtig / 3;
+	float Precision = (float) richtig / (richtig + falsch);
+	float Recall = (float) richtig / 3;
+	if (Recall > 1) Recall = 1;
 	vector<float> PrecRec = { Precision, Recall };
 	return PrecRec;
 }
@@ -136,7 +143,7 @@ vector<float> GT_Test(vector<Rect> Prognose, vector<int> Klasse, string file_loc
 void filterBoxes(vector<Rect>& Frames, vector<float>& Confidence, vector<int>& classID) {
 	// vect<Rect> Frames.Jedes Element dieses vects ist ein Rect mit Konfidenz > 50 % .
 
-	float threshhold = 0.3; // Flächenquotient ab dem wir kleinere rects beim überlapp löschen
+	float threshhold = 0.25; // Flächenquotient ab dem wir kleinere rects beim überlapp löschen
 	vector<Rect> newframes;
 	vector<float> newconfidences;
 	vector<int> newClassId;
@@ -209,7 +216,7 @@ void drawBoxes(Mat& img, vector<Rect>& window, vector<int>& classID, vector<floa
 		ss << "class: " << classID[i] << "; " << confidence[i];
 		string text = ss.str();
 		putText(img, text, topLeft, fontFace, fontScale, color, thickness_font, 8);
-		imwrite("/results/result" + std::to_string(imgNumber) + ".jpg", img);
+		imwrite("results/result" + std::to_string(imgNumber) + ".jpg", img);
 	}
 }
 
@@ -294,7 +301,7 @@ void SlidingWindow(Mat LoadedImage, int window_size, int stride, std::vector<flo
 			Mat roiAsMat = convertToMat(descriptor);
 			forestTask3.predict(roiAsMat, predictedOutput, cv::ml::DTrees::PREDICT_MAX_VOTE, tempConf, tempClass);
 			//cout << " " << predictedOutput << endl;
-			if (predictedOutput.at<int>(0, 0) != 3) {
+			if (predictedOutput.at<int>(0, 0) != 3 && tempConf[0]>=0.4) {
 				rectangle(imageOnlyResults, windows, Scalar(255), 1, 8, 0);
 				//cout << " " << predictedOutput << endl;
 				//namedWindow("Step 5 Draw Match", WINDOW_AUTOSIZE);
@@ -321,16 +328,27 @@ Mat convertToMat(vector<float> descriptor) { // + 1 because predict expects [des
 	return asMat;
 }
 
+void plotPrecisionRecall(Mat& img, vector<float> precRec, int num) {
+	// draw text
+	std::ostringstream ss;
+	ss << "Recall: " << precRec[1] << "; ";
+	string text = ss.str();
+	putText(img, text, Point(img.cols-180, img.rows-5), cv::FONT_ITALIC, 0.5, Scalar(0, 255, 0), 1, 8);
+	std::ostringstream sss;
+	sss << "Precision: " << precRec[0] << "; ";
+	text = sss.str();
+	putText(img, text, Point(img.cols - 180, img.rows-20), cv::FONT_ITALIC, 0.5, Scalar(0, 255, 0), 1, 8);
+	imwrite("results/result" + std::to_string(num) + ".jpg", img);
+}
 int main() {
 
-
 	// Setup Forest
-	int treeCount = 20;
-	int maxDepth = INT8_MAX;
+	int treeCount = 50;
+	int maxDepth = 20;
 	int cvFolds = 1;
-	int minSampleCount = 20;
-	int maxCategories = 10;
-	int samples = 50; 
+	int minSampleCount = 10;
+	int maxCategories = 15;
+	int samples = 800; 
 	forestTask3 = RandomForest(treeCount, maxDepth, cvFolds, minSampleCount, maxCategories); // Can also be called with ::create (For tutors)
 	
 	// Setup Training Data
@@ -349,22 +367,24 @@ int main() {
 
 	// Get Testfilenames
 	vector<string> filenames = list_dir("data/task3/test/");
+	vector<string> gtnames = list_dir("data/task3/gt/");
 
 	for (int k = 0; k < filenames.size(); k++) {
 		// init variables
+		cout << "calculating for img: " << k + 1 << endl;
 		vector<Rect> rects;
 		vector<float> confidence;
 		vector<int>predictedClasses;
 
 		Mat loadedImage = imread(filenames[k], IMREAD_COLOR);
-		for (int i = 8; i < 14; i++) {
+		for (int i = 8; i < 12; i++) {
 			SlidingWindow(loadedImage, 2 * loadedImage.rows / i, 2 * loadedImage.rows / (2 * i), confidence, predictedClasses, rects);
 		}
 
 		filterBoxes(rects, confidence, predictedClasses);
 		drawBoxes(loadedImage, rects, predictedClasses, confidence, k);
-
-
+		vector<float> precisionRecall = GT_Test(rects, predictedClasses, gtnames[k]);
+		plotPrecisionRecall(loadedImage, precisionRecall, k);
 	}
 	   	
 	cout << "DONE" << endl;

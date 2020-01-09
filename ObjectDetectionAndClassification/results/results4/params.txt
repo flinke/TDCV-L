@@ -1,0 +1,5 @@
+tree 41
+d 50
+min sampl 40
+cat 50
+sampl 800

@@ -1,0 +1,5 @@
+tree 30
+d 40
+minsamp 20
+cat 20
+sampl 800

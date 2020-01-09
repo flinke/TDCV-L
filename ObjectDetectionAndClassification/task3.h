@@ -23,3 +23,4 @@ void filterBoxes(vector<Rect>& Frames, vector<float>& Confidence, vector<float>&
 RandomForest forestTask3;
 vector<float> GT_Test(vector<Rect> Prognose, vector<int> Klasse, string file_loc);
 vector<int> StringToIntArray(string text);
+void plotPrecisionRecall(Mat& img, vector<float> precRec, int num);
